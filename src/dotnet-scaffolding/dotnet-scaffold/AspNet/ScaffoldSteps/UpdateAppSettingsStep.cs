@@ -153,10 +153,18 @@ namespace Microsoft.DotNet.Tools.Scaffold.AspNet.ScaffoldSteps.Settings
                         writeContent = true;
                         azureAdObject["Domain"] = Domain;
                     }
-                    else
+                    else if (string.IsNullOrEmpty(Domain) && !string.IsNullOrEmpty(TenantId) && 
+                             TenantId.EndsWith(".onmicrosoft.com", StringComparison.OrdinalIgnoreCase))
                     {
+                        // If Domain is not explicitly provided but TenantId is already a full domain, use it
                         writeContent = true;
-                        azureAdObject["Domain"] = $"{Username}.onmicrosoft.com";
+                        azureAdObject["Domain"] = TenantId;
+                    }
+                    else if (string.IsNullOrEmpty(Domain) && !string.IsNullOrEmpty(TenantId))
+                    {
+                        // If Domain is not explicitly provided and TenantId is not already a domain (likely a GUID), append .onmicrosoft.com
+                        writeContent = true;
+                        azureAdObject["Domain"] = $"{TenantId}.onmicrosoft.com";
                     }
 
                     if (!string.IsNullOrEmpty(TenantId) && (azureAdObject["TenantId"] is null || azureAdObject["TenantId"]?.ToString() != TenantId))
